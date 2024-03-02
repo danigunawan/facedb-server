@@ -1,2 +1,4 @@
-sanic
-dlib
+fastapi
+fastui
+face_recognition
+uvicorn
