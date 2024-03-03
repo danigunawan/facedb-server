@@ -18,6 +18,7 @@ from fastui import (
 from fastui.events import BackEvent
 
 from forms import SearchFaceForm
+from services.face_search import ReadOnlyFaceDB
 
 app = FastAPI()
 
@@ -48,7 +49,8 @@ async def search_face(image: UploadFile = File(...)) -> list[AnyComponent]:
     Returns the main UI page with the results of the search after doing an operation
     on the image file
     """
-    sleep(2)
+    face_db = ReadOnlyFaceDB()
+    results = face_db.search(image)
 
     return [
         c.Page(
@@ -59,11 +61,17 @@ async def search_face(image: UploadFile = File(...)) -> list[AnyComponent]:
                 ),
                 c.Heading(text="Search Results", level=3),
                 c.Text(text="Here are the results of your search"),
-                c.Image(src="https://picsum.photos/id/400/400"),
-                c.Image(src="https://picsum.photos/id/400/400"),
-                c.Image(src="https://picsum.photos/id/400/400"),
-                c.Image(src="https://picsum.photos/id/400/400"),
-                c.Image(src="https://picsum.photos/id/400/400"),
+            ]
+            + [
+                c.Image(
+                    src=url,
+                    referrer_policy="no-referrer",
+                    class_name="border rounded",
+                    loading="lazy",
+                    width=200,
+                    height=200,
+                )
+                for url in results
             ]
         )
     ]
@@ -72,4 +80,4 @@ async def search_face(image: UploadFile = File(...)) -> list[AnyComponent]:
 @app.get("/{path:path}")
 async def html_landing() -> HTMLResponse:
     """Simple HTML page which serves the React app, comes last as it matches all paths."""
-    return HTMLResponse(prebuilt_html(title="FaceDB"))
+    return HTMLResponse(prebuilt_html(title="Face Database"))
